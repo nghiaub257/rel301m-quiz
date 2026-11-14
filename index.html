@@ -57,7 +57,7 @@ button,select,input{font:inherit;color:inherit}
 .set-option .set-check{margin-left:auto;display:flex;flex:none}
 .icon:hover,.pbtn:hover:not([disabled]){border-color:var(--accent)}
 .seg{display:inline-flex;padding:3px;gap:2px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
-.seg button{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border:0;border-radius:9px;background:transparent;font-size:14px;font-weight:500;cursor:pointer}
+.seg button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:40px;height:36px;padding:0 10px;border:0;border-radius:9px;background:transparent;font-size:14px;font-weight:500;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);font-weight:600}
 .badge{min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--bad);color:var(--surface);font-size:12px;font-weight:700;display:grid;place-items:center}
 .icon{position:relative;display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer}
@@ -186,8 +186,7 @@ pre.math{font-family:var(--mono);font-size:13px;background:var(--surface2);borde
   .ctl{width:100%}
   .selwrap{flex:1 1 100%;min-width:0}
   .set-menu{width:100%;max-width:100%}
-  .seg{flex:1 1 auto}
-  .seg button{flex:1;justify-content:center;padding:0 8px}
+  .seg{flex:0 0 auto}
   .sync{position:fixed;left:12px;right:12px;top:auto;bottom:12px;width:auto}
   .side{display:none;position:static;max-width:none;max-height:none;flex-basis:100%}
   .side.open{display:block}
@@ -219,8 +218,8 @@ pre.math{font-family:var(--mono);font-size:13px;background:var(--surface2);borde
         <div class="set-menu" id="setMenu" role="menu" aria-label="Chọn bộ câu hỏi" hidden></div>
       </div>
       <div class="seg" role="group" aria-label="Chế độ">
-        <button id="mStudy" aria-pressed="true"><span data-ic="book" data-s="17"></span>Ôn từng câu</button>
-        <button id="mWrong" aria-pressed="false"><span data-ic="xc" data-s="17"></span>Câu sai<span class="badge" id="wrongN">0</span></button>
+        <button id="mStudy" type="button" aria-label="Ôn từng câu" title="Ôn từng câu" aria-pressed="true"><span data-ic="book" data-s="19"></span></button>
+        <button id="mWrong" type="button" aria-label="Câu sai: 0 câu" title="Câu sai" aria-pressed="false"><span data-ic="xc" data-s="19"></span><span class="badge" id="wrongN" aria-hidden="true">0</span></button>
       </div>
       <button class="icon" id="trBtn" aria-pressed="true" aria-label="Bật hoặc tắt bản dịch tiếng Việt" title="Dịch tiếng Việt"><span data-ic="lang" data-s="20"></span></button>
       <button class="icon" id="themeBtn" aria-label="Đổi giao diện sáng hoặc tối" title="Sáng / tối"><span id="themeIco"></span></button>
@@ -388,6 +387,7 @@ function renderStats(){
     '<span class="m c-ok">'+ic('check',15,2.4)+right+'</span><span class="m c-bad">'+ic('x',15,2.4)+bad+'</span>';
   var wrongN=all.filter(function(q){return store.ok[q.id]===false}).length;
   $('wrongN').textContent=wrongN;
+  $('mWrong').setAttribute('aria-label','Câu sai: '+wrongN+' câu');
   $('jumpTot').textContent='/ '+list.length;
 }
 function renderGrid(){
