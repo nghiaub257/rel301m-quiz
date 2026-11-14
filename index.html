@@ -41,11 +41,21 @@ button,select,input{font:inherit;color:inherit}
 .brand b{display:block;font-size:17px;letter-spacing:-.01em;line-height:1.25}
 .brand small{display:block;font-size:12.5px;color:var(--muted);line-height:1.3}
 .ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
-.selwrap{position:relative;display:flex;align-items:center;color:var(--muted)}
-.selwrap .selico{position:absolute;left:12px;pointer-events:none}
-.selwrap .selchev{position:absolute;right:12px;pointer-events:none}
-select{appearance:none;-webkit-appearance:none;height:44px;min-width:230px;max-width:100%;padding:0 38px 0 40px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);font-size:14px;font-weight:500;cursor:pointer}
-select:hover,.icon:hover,.pbtn:hover:not([disabled]){border-color:var(--accent)}
+.selwrap{position:relative;min-width:270px}
+.set-trigger{width:100%;height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);font-size:14px;font-weight:600;text-align:left;cursor:pointer}
+.set-trigger:hover,.set-trigger[aria-expanded="true"]{border-color:var(--accent)}
+.set-trigger .set-icon,.set-trigger .set-chevron{color:var(--muted);display:flex;flex:none}
+.set-trigger .set-chevron{margin-left:auto;transition:transform .15s}
+.set-trigger[aria-expanded="true"] .set-chevron{transform:rotate(180deg)}
+.set-trigger .set-current{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.set-menu{position:absolute;z-index:40;top:calc(100% + 8px);left:0;width:max(100%,310px);max-width:min(360px,calc(100vw - 32px));max-height:min(70vh,520px);overflow:auto;padding:7px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 36px rgba(10,20,40,.18)}
+.set-menu[hidden]{display:none}
+.set-group{padding:10px 10px 5px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.set-option{display:flex;width:100%;align-items:center;gap:10px;padding:9px 10px;border:0;border-radius:9px;background:transparent;text-align:left;cursor:pointer;font-size:13px}
+.set-option:hover,.set-option:focus-visible{background:var(--surface2)}
+.set-option[aria-checked="true"]{background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--accent);font-weight:700}
+.set-option .set-check{margin-left:auto;display:flex;flex:none}
+.icon:hover,.pbtn:hover:not([disabled]){border-color:var(--accent)}
 .seg{display:inline-flex;padding:3px;gap:2px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
 .seg button{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border:0;border-radius:9px;background:transparent;font-size:14px;font-weight:500;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);font-weight:600}
@@ -173,8 +183,8 @@ pre.math{font-family:var(--mono);font-size:13px;background:var(--surface2);borde
   .only-mobile{display:grid}
   .brand small{display:none}
   .ctl{width:100%}
-  select{min-width:0;flex:1 1 100%}
-  .selwrap{flex:1 1 100%}
+  .selwrap{flex:1 1 100%;min-width:0}
+  .set-menu{width:100%;max-width:100%}
   .seg{flex:1 1 auto}
   .seg button{flex:1;justify-content:center;padding:0 8px}
   .sync{position:fixed;left:12px;right:12px;top:auto;bottom:12px;width:auto}
@@ -203,7 +213,10 @@ pre.math{font-family:var(--mono);font-size:13px;background:var(--surface2);borde
       <div><b>REL301m</b><small id="sub">359 câu · có giải thích tiếng Việt</small></div>
     </div>
     <div class="ctl">
-      <label class="selwrap"><span class="selico" data-ic="layers" data-s="18"></span><select id="setSel" aria-label="Chọn bộ câu hỏi"></select><span class="selchev" data-ic="chevD" data-s="16"></span></label>
+      <div class="selwrap" id="setWrap">
+        <button class="set-trigger" id="setTrigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="setMenu" aria-label="Chọn bộ câu hỏi"><span class="set-icon" data-ic="layers" data-s="18"></span><span class="set-current" id="setCurrent"></span><span class="set-chevron" data-ic="chevD" data-s="16"></span></button>
+        <div class="set-menu" id="setMenu" role="menu" aria-label="Chọn bộ câu hỏi" hidden></div>
+      </div>
       <div class="seg" role="group" aria-label="Chế độ">
         <button id="mStudy" aria-pressed="true"><span data-ic="book" data-s="17"></span>Ôn từng câu</button>
         <button id="mWrong" aria-pressed="false"><span data-ic="xc" data-s="17"></span>Câu sai<span class="badge" id="wrongN">0</span></button>
@@ -418,9 +431,13 @@ function renderCard(){
   $('jump').value=store.idx+1;$('jump').max=list.length;
 }
 function renderTop(){
-  var sS=$('setSel');
-  if(!sS.options.length){SETS.forEach(function(d){var o=document.createElement('option');o.value=d.id;o.textContent=d.label;sS.appendChild(o)})}
-  sS.value=store.set;
+  $('setCurrent').textContent=setDef().label;
+  $('setMenu').innerHTML=SETS.map(function(d,i){
+    var heading=i===0?'Tổng quan':i===1?'Đề thi':i===5?'Coursera':'';
+    var selected=d.id===store.set;
+    return (heading?'<div class="set-group" role="presentation">'+heading+'</div>':'')+
+      '<button type="button" class="set-option" role="menuitemradio" aria-checked="'+selected+'" data-set="'+d.id+'" tabindex="-1"><span>'+esc(d.label)+'</span>'+(selected?'<span class="set-check">'+ic('check',17,2.4)+'</span>':'')+'</button>';
+  }).join('');
   $('mStudy').setAttribute('aria-pressed',store.mode==='study');
   $('mWrong').setAttribute('aria-pressed',store.mode==='wrong');
   $('trBtn').setAttribute('aria-pressed',store.tr);
@@ -464,7 +481,27 @@ $('rndBtn').onclick=function(){
   if(!left.length){return}
   var after=left.filter(function(i){return i>store.idx});go(after.length?after[0]:left[0]);
 };
-$('setSel').onchange=function(){store.set=this.value;store.idx=0;reload()};
+function setMenuOpen(open,focusOption){
+  var menu=$('setMenu'),trigger=$('setTrigger');
+  menu.hidden=!open;trigger.setAttribute('aria-expanded',open?'true':'false');
+  if(open&&focusOption){var selected=menu.querySelector('[aria-checked="true"]')||menu.querySelector('.set-option');if(selected)selected.focus()}
+}
+$('setTrigger').onclick=function(){setMenuOpen($('setMenu').hidden,true)};
+$('setTrigger').addEventListener('keydown',function(e){
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();setMenuOpen(true,true)}
+});
+$('setMenu').addEventListener('click',function(e){
+  var b=e.target.closest('[data-set]');if(!b)return;
+  store.set=b.dataset.set;store.idx=0;setMenuOpen(false);reload();$('setTrigger').focus();
+});
+$('setMenu').addEventListener('keydown',function(e){
+  var items=Array.prototype.slice.call(this.querySelectorAll('.set-option')),i=items.indexOf(document.activeElement);
+  if(e.key==='Escape'){e.preventDefault();e.stopPropagation();setMenuOpen(false);$('setTrigger').focus()}
+  else if(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key==='Home'||e.key==='End'){
+    e.preventDefault();var next=e.key==='Home'?0:e.key==='End'?items.length-1:(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length;items[next].focus();
+  }else if(e.key==='Tab'){setMenuOpen(false)}
+});
+document.addEventListener('click',function(e){if(!$('setWrap').contains(e.target))setMenuOpen(false)});
 $('mStudy').onclick=function(){store.mode='study';store.idx=0;reload()};
 $('mWrong').onclick=function(){store.mode='wrong';store.idx=0;reload()};
 $('trBtn').onclick=function(){store.tr=!store.tr;render()};
@@ -535,6 +572,7 @@ $('syncIn').addEventListener('keydown',function(e){if(e.key==='Enter'){e.prevent
 
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'&&!$('syncPanel').hidden){openSync(false);$('syncBtn').focus();return}
+  if(e.target&&$('setWrap').contains(e.target))return;
   var t=e.target&&e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA'||e.ctrlKey||e.metaKey||e.altKey)return;
   var q=cur();
   if(e.key==='ArrowLeft'){go(store.idx-1)}
