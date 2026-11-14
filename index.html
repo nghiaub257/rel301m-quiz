@@ -145,12 +145,24 @@ select:hover,.icon:hover,.pbtn:hover:not([disabled]){border-color:var(--accent)}
 .math{overflow-x:auto;padding:6px 0;margin:4px 0 10px;max-width:100%}
 pre.math{font-family:var(--mono);font-size:13px;background:var(--surface2);border-radius:8px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere}
 .tipbox{background:color-mix(in srgb,var(--warn) 14%,var(--surface));border-radius:12px;padding:12px 16px}
-.pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
-.pager .mid{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
-.jump{display:flex;align-items:center;gap:8px;height:48px;padding:0 6px 0 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--muted);font-size:14px}
-.jump input{width:46px;border:0;background:transparent;font-size:16px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;padding:0}
-.jump .go{display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:10px;background:var(--surface2);cursor:pointer}
+.pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.pager-nav,.pager-tools{display:flex;align-items:center;gap:8px}
+.pager .pbtn{height:44px;border-radius:11px;padding:0 14px;font-size:14px;white-space:nowrap}
+.pager .primary{padding:0 16px}
+.pager-unanswered{color:var(--muted)}
+.jump{display:flex;align-items:center;gap:8px;height:44px;padding:0 5px 0 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--muted);font-size:13px;white-space:nowrap}
+.jump input{width:42px;height:32px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);font-size:14px;font-weight:600;text-align:center;font-variant-numeric:tabular-nums;padding:0}
+.jump .go{height:34px;padding:0 12px;border:0;border-radius:8px;background:var(--surface2);color:var(--fg);font-weight:600;cursor:pointer}
+.jump .go:hover{background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
 .jump .tot{font-variant-numeric:tabular-nums}
+@media (max-width:600px){
+  .pager{gap:12px;padding:12px}
+  .pager-nav,.pager-tools{width:100%}
+  .pager-nav .pbtn{flex:1}
+  .pager-tools{justify-content:space-between}
+  .pager-unanswered{flex:1}
+}
+@media (max-width:390px){.pager-tools{flex-wrap:wrap}.pager-unanswered,.jump{width:100%;justify-content:center}}
 .empty{text-align:center;padding:50px 10px;color:var(--muted)}
 .kbd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;color:var(--muted);font-size:13px;margin:0}
 .kbd kbd{font:inherit;font-weight:600;color:var(--fg);padding:1px 7px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
@@ -237,12 +249,14 @@ pre.math{font-family:var(--mono);font-size:13px;background:var(--surface2);borde
     <main class="main">
       <article class="card" id="card"></article>
       <nav class="pager" aria-label="Điều hướng câu hỏi">
-        <button class="pbtn sq" id="prev" aria-label="Câu trước" title="Câu trước"><span data-ic="chevL" data-s="22"></span></button>
-        <div class="mid">
-          <label class="jump"><span data-ic="olist" data-s="18"></span><span class="sr">Đến câu số</span><input id="jump" type="number" min="1" inputmode="numeric"><span class="tot" id="jumpTot">/ 0</span><button class="go" id="goBtn" aria-label="Đi tới câu này" title="Đi" type="button"><span data-ic="arrow" data-s="18"></span></button></label>
-          <button class="pbtn sq" id="rndBtn" aria-label="Nhảy tới câu chưa làm" title="Câu chưa làm"><span data-ic="skip" data-s="20"></span></button>
+        <div class="pager-nav">
+          <button class="pbtn pager-prev" id="prev"><span data-ic="chevL" data-s="20"></span>Câu trước</button>
+          <button class="pbtn primary" id="next">Câu sau<span data-ic="chevR" data-s="20"></span></button>
         </div>
-        <button class="pbtn primary" id="next">Câu sau<span data-ic="chevR" data-s="20"></span></button>
+        <div class="pager-tools">
+          <button class="pbtn pager-unanswered" id="rndBtn" title="Tới câu chưa làm tiếp theo"><span data-ic="skip" data-s="18"></span>Câu chưa làm</button>
+          <div class="jump"><label for="jump">Đến câu</label><input id="jump" type="number" min="1" inputmode="numeric"><span class="tot" id="jumpTot">/ 0</span><button class="go" id="goBtn" aria-label="Đi tới câu này" type="button">Đi</button></div>
+        </div>
       </nav>
       <p class="kbd"><span data-ic="kbd" data-s="17"></span><span><kbd>←</kbd> <kbd>→</kbd> chuyển câu</span><span><kbd>1</kbd>–<kbd>4</kbd> hoặc <kbd>A</kbd>–<kbd>F</kbd> chọn đáp án</span><span><kbd>Enter</kbd> kiểm tra / câu sau</span></p>
     </main>
